@@ -1,5 +1,5 @@
 public class MassiveInteger{
-
+    private static final long BASE = 1000000000L;
     /*
     Custom class to store integers that are much to big to be longs
     The array of ints itself (not the individual ints within the array)
@@ -46,11 +46,42 @@ public class MassiveInteger{
         }
 
     }
-    /* 
-    public MassiveInteger add(MassiveInteger b){
 
+    public MassiveInteger(int[] contents, boolean positive){
+        this.contents = contents;
+        this.positive = positive;
+    }
+     
+    public MassiveInteger add(MassiveInteger b){
+        /*
+        this method could add a bunch of extra elements of all 0's in contents
+        we should trim in instantiation
+
+        HAVE NOT YET ACCOUNTED FOR NEGATIVE AND POSITIVITY
+         */
+        int maxResultSize = (Math.max(this.contents.length, b.contents.length) + 1);
+        int[] resultContents = new int[maxResultSize];
+
+        long carry = 0;
+
+        for (int i = 0; i < maxResultSize; i++){
+            long thisVal = (i<this.contents.length) ? this.contents[i] : 0;
+            long bVal = (i<b.contents.length) ? b.contents[i] : 0;
+
+            long intermediateRes = thisVal+bVal+carry;
+
+            resultContents[i]=(int) (intermediateRes%this.BASE);
+            carry = intermediateRes / BASE;
+        }
+
+        if (carry!=0){
+            resultContents[maxResultSize]=(int)carry;
+        }
+
+        return new MassiveInteger(resultContents,this.positive);
     }
 
+    /*
     public MassiveInteger subtract(MassiveInteger b){
 
     }
