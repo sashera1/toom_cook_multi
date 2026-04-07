@@ -11,11 +11,13 @@ public class ToomCookMulti {
     public static String multiply(String aStr, String bStr){
         MassiveInteger a = new MassiveInteger(aStr);
         MassiveInteger b = new MassiveInteger(bStr);
-
+        
 
 
         return "";
     }
-    
+    /*
+    what we need: main recursive alg, and helper methods 
+    where appropriate to encapsulate concepts and/or reuse code */
 
 }

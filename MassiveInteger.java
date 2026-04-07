@@ -60,6 +60,19 @@ public class MassiveInteger{
     public void flipSign(){
         this.positive = !this.positive;
     }
+
+    private void trim(){
+        /*
+        trim leading 0's if needed
+         */
+        i = this.contents.length
+        while (this.contents[i]==0){
+            /*
+            TODO trim leading 0's and replace contents with new shorter array if needed
+            */
+            i--;
+        }
+    }
      
     public MassiveInteger add(MassiveInteger b){
         /*
@@ -67,8 +80,11 @@ public class MassiveInteger{
         we should trim in instantiation
 
         HAVE NOT YET ACCOUNTED FOR NEGATIVE AND POSITIVITY
+        HAVE TO DECIDE HOW TO RELATE/DISTRIBUTE RESPONSIBITY add AND subtract
+        ie: if adding a negative to pos, or pos to neg, or neg to neg, where responsibity for that is
+        im thinking only call add for pos+pos or neg+neg and include flag
          */
-
+        
 
         int maxResultSize = (Math.max(this.contents.length, b.contents.length) + 1);
         int[] resultContents = new int[maxResultSize];
@@ -88,6 +104,7 @@ public class MassiveInteger{
         /* 
         since the max result size is at least one place val greater than 
         either input, we only have to place, not add, the carry (if carry != 0 at all)
+
         */
         if (carry!=0){
             resultContents[maxResultSize]=(int)carry;
@@ -96,9 +113,9 @@ public class MassiveInteger{
         return new MassiveInteger(resultContents,this.positive);
     }
 
-    /*
+    /* see add for consideratons
     public MassiveInteger subtract(MassiveInteger b){
-
+        
     }
     */
 
