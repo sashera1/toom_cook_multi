@@ -15,6 +15,8 @@ public class Main{
 
         System.out.println(testy.schoolbookMultiply(testy2).toString());
         System.out.println(4321*3298);
+        System.out.println(res.scalarMultiply(23));
+        System.out.println((4321+3298)*23);
 
     }
 

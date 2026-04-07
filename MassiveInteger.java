@@ -68,6 +68,8 @@ public class MassiveInteger{
 
         HAVE NOT YET ACCOUNTED FOR NEGATIVE AND POSITIVITY
          */
+
+
         int maxResultSize = (Math.max(this.contents.length, b.contents.length) + 1);
         int[] resultContents = new int[maxResultSize];
 
@@ -83,6 +85,10 @@ public class MassiveInteger{
             carry = intermediateRes / BASE;
         }
 
+        /* 
+        since the max result size is at least one place val greater than 
+        either input, we only have to place, not add, the carry (if carry != 0 at all)
+        */
         if (carry!=0){
             resultContents[maxResultSize]=(int)carry;
         }
@@ -119,7 +125,7 @@ public class MassiveInteger{
                 carry = res / BASE;
 
             }
-            if (carry>0){
+            if (carry!=0){
                 int carryIdx = i+bLen;
                 while (carry>0 && carryIdx < resultContents.length){
                     long sum = resultContents[carryIdx] + carry;
@@ -136,11 +142,26 @@ public class MassiveInteger{
 
     }
 
-    /* 
+    
     public MassiveInteger scalarMultiply(int scalar){
+        boolean positiveRes = (this.positive==(scalar>=0));
+        int thisLen = this.contents.length;
+        int[] resultContents = new int[thisLen+1]; //dont think we're using scalars big enough for this to ever be an issue
+        long carry = 0;
 
+        for (int i = 0; i<thisLen; i++){
+            long res = (long)this.contents[i] * scalar;
+            resultContents[i]=(int)(res%BASE);
+            carry = res/BASE;
+        }
+        if (carry!=0){
+            resultContents[thisLen] = (int)carry;
+        }
+        MassiveInteger result = new MassiveInteger(resultContents,positiveRes);
+        return result;
     }
 
+    /* 
     public MassiveInteger scalarDivide(int scalar){
 
     }
