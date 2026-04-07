@@ -48,8 +48,17 @@ public class MassiveInteger{
     }
 
     public MassiveInteger(int[] contents, boolean positive){
+        //should add something that truncates unneeded empty 0 ints in array
         this.contents = contents;
         this.positive = positive;
+    }
+
+    public boolean isPositive(){
+        return this.positive;
+    }
+
+    public void flipSign(){
+        this.positive = !this.positive;
     }
      
     public MassiveInteger add(MassiveInteger b){
@@ -70,7 +79,7 @@ public class MassiveInteger{
 
             long intermediateRes = thisVal+bVal+carry;
 
-            resultContents[i]=(int) (intermediateRes%this.BASE);
+            resultContents[i]=(int) (intermediateRes%BASE);
             carry = intermediateRes / BASE;
         }
 
@@ -85,15 +94,49 @@ public class MassiveInteger{
     public MassiveInteger subtract(MassiveInteger b){
 
     }
+    */
 
     public MassiveInteger schoolbookMultiply(MassiveInteger b){
+
+        boolean positiveRes = (this.positive==b.isPositive());
         
         //When Massive integer becomes small enought (the "base case"),
         //schoolbook multiplication should be called
-        
+
+        int thisLen = this.contents.length;
+        int bLen = b.contents.length;
+
+        int[] resultContents = new int[thisLen+bLen];
+
+        for (int i = 0; i<thisLen; i++){
+            long carry = 0;
+            for (int j = 0; j < thisLen; j++){
+
+                long product = ((long)this.contents[i])*((long)b.contents[j]);
+                long res = product + resultContents[i+j] + carry;
+
+                resultContents[i+j] = (int)(res%BASE);
+                carry = res / BASE;
+
+            }
+            if (carry>0){
+                int carryIdx = i+bLen;
+                while (carry>0 && carryIdx < resultContents.length){
+                    long sum = resultContents[carryIdx] + carry;
+                    resultContents[carryIdx] = (int)(sum%BASE);
+                    carry = sum / BASE;
+                    carryIdx++;
+                }
+
+            }
+
+        }
+        MassiveInteger result = new MassiveInteger(resultContents,positiveRes);
+        return result;
 
     }
 
+    /* 
     public MassiveInteger scalarMultiply(int scalar){
 
     }

@@ -7,10 +7,14 @@ public class Main{
         //ToomCookMulti.multiply("3158351","51386597");
 
         //for testing rn
-        MassiveInteger testy = new MassiveInteger("843214211249835");
-        MassiveInteger testy2 = new MassiveInteger("5329856149835");
+        MassiveInteger testy = new MassiveInteger("4321");
+        MassiveInteger testy2 = new MassiveInteger("3298");
         MassiveInteger res = testy.add(testy2);
         System.out.println(res.toString());
+        System.out.println(4321+3298);
+
+        System.out.println(testy.schoolbookMultiply(testy2).toString());
+        System.out.println(4321*3298);
 
     }
 
