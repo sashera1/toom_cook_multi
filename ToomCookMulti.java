@@ -8,13 +8,13 @@ public class ToomCookMulti {
     */
 
 
-    public static int multiply(String aStr, String bStr){
-        MassiveInteger a = MassiveInteger(aStr);
-        MassiveInteger b = MassiveInteger(bStr);
-        
+    public static String multiply(String aStr, String bStr){
+        MassiveInteger a = new MassiveInteger(aStr);
+        MassiveInteger b = new MassiveInteger(bStr);
 
 
-        return 0;
+
+        return "";
     }
     
 
