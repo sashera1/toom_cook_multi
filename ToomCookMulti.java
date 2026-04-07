@@ -8,8 +8,10 @@ public class ToomCookMulti {
     */
 
 
-    public static int multiply(String a, String b){
-
+    public static int multiply(String aStr, String bStr){
+        MassiveInteger a = MassiveInteger(aStr);
+        MassiveInteger b = MassiveInteger(bStr);
+        
 
 
         return 0;
