@@ -61,11 +61,11 @@ public class MassiveInteger{
         this.positive = !this.positive;
     }
 
-    private void trim(){
+    public void trim(){
         /*
         trim leading 0's if needed
          */
-        i = this.contents.length
+        int i = this.contents.length;
         while (this.contents[i]==0){
             /*
             TODO trim leading 0's and replace contents with new shorter array if needed

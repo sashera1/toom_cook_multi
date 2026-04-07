@@ -17,6 +17,11 @@ public class Main{
         System.out.println(4321*3298);
         System.out.println(res.scalarMultiply(23));
         System.out.println((4321+3298)*23);
+        /* 
+        MassiveInteger trimTest = new MassiveInteger("000000000000000000000004321");
+        trimTest.trim();
+        System.out.println(trimTest.toString());
+        */
 
     }
 
