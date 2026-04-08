@@ -316,7 +316,7 @@ public class MassiveInteger{
             System.err.println("NO DIVISION BY 0 PLZ");
         }
         if (this.length()==1 && this.contents[0]==0){
-            return new MassiveInteger("0");
+            return this;
         }
 
         boolean positiveRes = (this.positive==(scalar>=0));
@@ -340,9 +340,21 @@ public class MassiveInteger{
 
     
     public MassiveInteger leftShift(int shiftFactor){
+        /*
+        shifts shiftfactor elements of contents[],
+        not normal arithmetiic shift
+         */
         if (this.length()==1 && this.contents[0]==0){
-            return new MassiveInteger("0");
+            return this;
         }
+        int[] shiftedContents = new int[this.contents.length + shiftFactor];
+        System.arraycopy(
+            this.contents,
+            0,
+            shiftedContents, 
+            shiftFactor, 
+            this.contents.length);
+        return new MassiveInteger(shiftedContents, this.isPositive());
 
     }
     

@@ -22,10 +22,13 @@ public class Main{
         MassiveInteger trimTest = new MassiveInteger("000000000000000000000004321");
         trimTest.trim();
         System.out.println(trimTest.toString());
-        */
-        MassiveInteger testy = new MassiveInteger("-4320432329843214320");
+        
+        MassiveInteger testy = new MassiveInteger("4320432329843214320");
         MassiveInteger testy2 = new MassiveInteger("043232983214321");
-        System.out.println(testy.scalarDivide(-1));
+        System.out.println(testy.leftShift(3));
+        */
+        String res = ToomCookMulti.multiply("-4320432329843214320", "043232983214321").toString();
+        System.out.println(res);
         
 
     }
