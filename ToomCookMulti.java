@@ -22,27 +22,49 @@ public class ToomCookMulti {
             return a.schoolbookMultiply(b);
         }
         int k = (Math.max(a.length(), b.length()) + 2) / 3;
-        MassiveInteger a0 = a.getLimbs(0, k);
-        MassiveInteger a1 = a.getLimbs(k, 2*k);
-        MassiveInteger a2 = a.getLimbs(2*k, a.length());
-        MassiveInteger b0 = b.getLimbs(0, k);
-        MassiveInteger b1 = b.getLimbs(k, 2*k);
-        MassiveInteger b2 = b.getLimbs(2*k, b.length());
+        MassiveInteger aLow  = a.getLimbs(0, k);
+        MassiveInteger aMid  = a.getLimbs(k, 2*k);
+        MassiveInteger aHigh = a.getLimbs(2*k, a.length());
+        MassiveInteger bLow  = b.getLimbs(0, k);
+        MassiveInteger bMid  = b.getLimbs(k, 2*k);
+        MassiveInteger bHigh = b.getLimbs(2*k, b.length());
 
-        // Evaluate at {0, 1, -1, 2, inf}
-        MassiveInteger p0   = a0;
-        MassiveInteger p1   = a0.add(a1).add(a2);
-        MassiveInteger pm1  = a0.subtract(a1).add(a2);
-        MassiveInteger p2   = a0.add(a1.scalarMultiply(2)).add(a2.scalarMultiply(4));
-        MassiveInteger pinf = a2;
+        // Evaluate at {0, 1, -1, -2, inf}
+        MassiveInteger aAtZero = aLow;
+        MassiveInteger aAtOne  = aLow.add(aMid).add(aHigh);
+        MassiveInteger aAtNeg1 = aLow.subtract(aMid).add(aHigh);
+        MassiveInteger aAtNeg2 = aLow.subtract(aMid.scalarMultiply(2)).add(aHigh.scalarMultiply(4));
+        MassiveInteger aAtInf  = aHigh;
 
-        MassiveInteger q0   = b0;
-        MassiveInteger q1   = b0.add(b1).add(b2);
-        MassiveInteger qm1  = b0.subtract(b1).add(b2);
-        MassiveInteger q2   = b0.add(b1.scalarMultiply(2)).add(b2.scalarMultiply(4));
-        MassiveInteger qinf = b2;
+        MassiveInteger bAtZero = bLow;
+        MassiveInteger bAtOne  = bLow.add(bMid).add(bHigh);
+        MassiveInteger bAtNeg1 = bLow.subtract(bMid).add(bHigh);
+        MassiveInteger bAtNeg2 = bLow.subtract(bMid.scalarMultiply(2)).add(bHigh.scalarMultiply(4));
+        MassiveInteger bAtInf  = bHigh;
 
-        return null; // placeholder
+        // Pointwise recursive multiplication
+        MassiveInteger productAtZero = toom3(aAtZero, bAtZero);
+        MassiveInteger productAtOne  = toom3(aAtOne,  bAtOne);
+        MassiveInteger productAtNeg1 = toom3(aAtNeg1, bAtNeg1);
+        MassiveInteger productAtNeg2 = toom3(aAtNeg2, bAtNeg2);
+        MassiveInteger productAtInf  = toom3(aAtInf,  bAtInf);
+
+        // Interpolation (Bodrato sequence)
+        MassiveInteger w0 = productAtZero;
+        MassiveInteger w4 = productAtInf;
+        MassiveInteger w3 = productAtNeg2.subtract(productAtOne).scalarDivide(3);
+        MassiveInteger w1 = productAtOne.subtract(productAtNeg1).scalarDivide(2);
+        MassiveInteger w2 = productAtNeg1.subtract(productAtZero);
+        w3 = w2.subtract(w3).scalarDivide(2).add(w4.scalarMultiply(2));
+        w2 = w2.add(w1).subtract(w4);
+        w1 = w1.subtract(w3);
+
+        // Recomposition
+        return w0
+            .add(w1.leftShift(k))
+            .add(w2.leftShift(2*k))
+            .add(w3.leftShift(3*k))
+            .add(w4.leftShift(4*k));
     }
 
 }
