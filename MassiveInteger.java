@@ -183,15 +183,10 @@ public class MassiveInteger{
         records signs
          */
 
-        if (this.isPositive() && !b.isPositive()){
+        if (this.isPositive() != b.isPositive()){
             MassiveInteger bMag = createShallowCopy(b);
             bMag.flipSign();
             return this.add(bMag);
-        }
-        if (!this.isPositive() && b.isPositive()){
-            MassiveInteger thisMag = createShallowCopy(this);
-            thisMag.flipSign();
-            return b.add(thisMag);
         }
 
         int magnitudeFlag = this.getMagnitude(b);
