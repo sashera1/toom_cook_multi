@@ -53,6 +53,18 @@ public class MassiveInteger{
         this.positive = positive;
     }
 
+    public static MassiveInteger createShallowCopy(MassiveInteger massiveInteger){
+        /*
+        helpful for dealing with negative signs
+         */
+        return new MassiveInteger(massiveInteger.contents,massiveInteger.positive);
+    }
+
+
+    public int length(){
+        return this.contents.length;
+    }
+
     public boolean isPositive(){
         return this.positive;
     }
@@ -64,26 +76,71 @@ public class MassiveInteger{
     public void trim(){
         /*
         trim leading 0's if needed
+        also returns sign to positive if MassiveInt is just 0
          */
-        int i = this.contents.length;
+        int i = this.contents.length-1;
+
+        if (i==0 && this.contents[0]==0){
+            this.positive=true;
+        }
+
+        if (this.contents[i]!=0){
+            return;
+        }
+
         while (this.contents[i]==0){
-            /*
-            TODO trim leading 0's and replace contents with new shorter array if needed
-            */
             i--;
         }
+
+        int newContentsLen = i+1;
+        int[] newContents = new int [newContentsLen];
+
+        for (int j = 0; j<newContentsLen;j++){
+            newContents[j]=this.contents[j];
+        }
+        this.contents=newContents;
+    }
+
+    public int getMagnitude(MassiveInteger b){
+        /*
+        helper method for comparing magnitude
+        returns 1 if this is greater,
+        -1 if b is greater
+        0 if equal
+        */
+        int thisLen = this.contents.length;
+        int bLen = b.contents.length;
+
+        if (thisLen > bLen) return 1;
+        if (thisLen < bLen) return -1;
+
+        for (int i = thisLen - 1; i >= 0; i--) {
+        if (this.contents[i] > b.contents[i]) return 1;
+        if (this.contents[i] < b.contents[i]) return -1;
+    }
+
+    return 0;
+
+
     }
      
     public MassiveInteger add(MassiveInteger b){
-        /*
-        this method could add a bunch of extra elements of all 0's in contents
-        we should trim in instantiation
-
-        HAVE NOT YET ACCOUNTED FOR NEGATIVE AND POSITIVITY
-        HAVE TO DECIDE HOW TO RELATE/DISTRIBUTE RESPONSIBITY add AND subtract
-        ie: if adding a negative to pos, or pos to neg, or neg to neg, where responsibity for that is
-        im thinking only call add for pos+pos or neg+neg and include flag
+        /*        
          */
+
+
+        if (this.isPositive() && !b.isPositive()){
+            MassiveInteger bMag = createShallowCopy(b);
+            bMag.flipSign();
+            return this.subtract(bMag);
+        }
+        if (!this.isPositive() && b.isPositive()){
+            MassiveInteger thisMag = createShallowCopy(this);
+            thisMag.flipSign();
+            return b.subtract(thisMag);
+        }
+
+        boolean resultPos = this.isPositive() ? true : false; //only have to check sign of 1 as different signs already accounted for
         
 
         int maxResultSize = (Math.max(this.contents.length, b.contents.length) + 1);
@@ -110,12 +167,72 @@ public class MassiveInteger{
             resultContents[maxResultSize - 1]=(int)carry;
         }
 
-        return new MassiveInteger(resultContents,this.positive);
+        
+        MassiveInteger resInt = new MassiveInteger(resultContents,resultPos);
+        resInt.trim();
+        return resInt;
     }
 
-    public int length(){
-        return this.contents.length;
+
+    public MassiveInteger subtract(MassiveInteger b){
+        /*
+        performs subtraction
+        checks if signs suggest addition is underlying operation,
+        if not, performs subtraction on the larger magnitude MasInt
+        guarenteeing borrowing can always happen
+        records signs
+         */
+
+        if (this.isPositive() && !b.isPositive()){
+            MassiveInteger bMag = createShallowCopy(b);
+            bMag.flipSign();
+            return this.add(bMag);
+        }
+        if (!this.isPositive() && b.isPositive()){
+            MassiveInteger thisMag = createShallowCopy(this);
+            thisMag.flipSign();
+            return b.add(thisMag);
+        }
+
+        int magnitudeFlag = this.getMagnitude(b);
+
+        if (magnitudeFlag==0){
+            return new MassiveInteger("0");
+        }
+
+        MassiveInteger greaterMagInt = (magnitudeFlag > 0) ? this : b;
+        MassiveInteger lesserMagInt = (magnitudeFlag > 0) ? b : this;
+
+        int[] resultContents = new int[greaterMagInt.contents.length];
+        long borrow = 0;
+
+        for(int i = 0; i<greaterMagInt.contents.length;i++){
+            long gMagIntVal = greaterMagInt.contents[i];
+            long lMagIntVal = (i<lesserMagInt.contents.length) ? lesserMagInt.contents[i] : 0;
+
+            long dif = gMagIntVal - lMagIntVal - borrow;
+
+            if (dif<0){
+                dif+=BASE;
+                borrow = 1;
+
+            }
+            else{
+                borrow=0;
+            }
+            resultContents[i] = (int)dif;
+        }
+
+        //this line actually accounts both for if we "switched" our operands (the ?) 
+        //and if the original values were both negative
+        boolean resultPos =  (magnitudeFlag > 0) ? this.isPositive() : !this.isPositive();
+
+        MassiveInteger resInt = new MassiveInteger(resultContents,resultPos);
+        resInt.trim();
+        return resInt;
     }
+    
+
 
     public MassiveInteger getLimbs(int from, int to){
         int actualTo = Math.min(to, this.contents.length);
@@ -124,14 +241,12 @@ public class MassiveInteger{
         for (int i = 0; i < len; i++){
             result[i] = this.contents[from + i];
         }
-        return new MassiveInteger(result, true); // always positive; sign handled by caller
+        MassiveInteger resInt = new MassiveInteger(result, true); // always positive; sign handled by caller
+        resInt.trim();
+        return resInt;
     }
 
-    /* see add for considerations
-    public MassiveInteger subtract(MassiveInteger b){
-
-    }
-    */
+    
 
     public MassiveInteger schoolbookMultiply(MassiveInteger b){
 
@@ -168,7 +283,9 @@ public class MassiveInteger{
             }
 
         }
+        
         MassiveInteger result = new MassiveInteger(resultContents,positiveRes);
+        result.trim();
         return result;
 
     }
@@ -189,18 +306,46 @@ public class MassiveInteger{
             resultContents[thisLen] = (int)carry;
         }
         MassiveInteger result = new MassiveInteger(resultContents,positiveRes);
+        result.trim();
         return result;
     }
 
-    /* 
+     
     public MassiveInteger scalarDivide(int scalar){
+        if (scalar==0){
+            System.err.println("NO DIVISION BY 0 PLZ");
+        }
+        if (this.length()==1 && this.contents[0]==0){
+            return new MassiveInteger("0");
+        }
+
+        boolean positiveRes = (this.positive==(scalar>=0));
+        scalar = Math.abs(scalar);
+        int thisLen = this.contents.length;
+        int[] resultContents = new int[thisLen];
+        long remainder = 0;
+
+        for (int i = thisLen-1; i>=0;i--){
+            long toDivide = (remainder*BASE)+this.contents[i];
+            resultContents[i]=(int)(toDivide/scalar);
+            remainder = toDivide%scalar;
+        }
+        //due to the nature of Toom-Cook, there will never be a decimal remainder
+
+        MassiveInteger result = new MassiveInteger(resultContents,positiveRes);
+        result.trim();
+        return result;
 
     }
 
+    
     public MassiveInteger leftShift(int shiftFactor){
+        if (this.length()==1 && this.contents[0]==0){
+            return new MassiveInteger("0");
+        }
 
     }
-    */
+    
     public String toString(){
         String result = "";
         if (this.positive == false){
