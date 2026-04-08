@@ -91,7 +91,7 @@ public class MassiveInteger{
 
         long carry = 0;
 
-        for (int i = 0; i < maxResultSize; i++){
+        for (int i = 0; i < maxResultSize - 1; i++){
             long thisVal = (i<this.contents.length) ? this.contents[i] : 0;
             long bVal = (i<b.contents.length) ? b.contents[i] : 0;
 
@@ -107,15 +107,29 @@ public class MassiveInteger{
 
         */
         if (carry!=0){
-            resultContents[maxResultSize]=(int)carry;
+            resultContents[maxResultSize - 1]=(int)carry;
         }
 
         return new MassiveInteger(resultContents,this.positive);
     }
 
-    /* see add for consideratons
+    public int length(){
+        return this.contents.length;
+    }
+
+    public MassiveInteger getLimbs(int from, int to){
+        int actualTo = Math.min(to, this.contents.length);
+        int len = Math.max(0, actualTo - from);
+        int[] result = new int[Math.max(1, len)];
+        for (int i = 0; i < len; i++){
+            result[i] = this.contents[from + i];
+        }
+        return new MassiveInteger(result, true); // always positive; sign handled by caller
+    }
+
+    /* see add for considerations
     public MassiveInteger subtract(MassiveInteger b){
-        
+
     }
     */
 
@@ -133,7 +147,7 @@ public class MassiveInteger{
 
         for (int i = 0; i<thisLen; i++){
             long carry = 0;
-            for (int j = 0; j < thisLen; j++){
+            for (int j = 0; j < bLen; j++){
 
                 long product = ((long)this.contents[i])*((long)b.contents[j]);
                 long res = product + resultContents[i+j] + carry;
@@ -167,7 +181,7 @@ public class MassiveInteger{
         long carry = 0;
 
         for (int i = 0; i<thisLen; i++){
-            long res = (long)this.contents[i] * scalar;
+            long res = (long)this.contents[i] * scalar + carry;
             resultContents[i]=(int)(res%BASE);
             carry = res/BASE;
         }
@@ -192,9 +206,9 @@ public class MassiveInteger{
         if (this.positive == false){
             result += "-";
         }
-        
-        for (int i = this.contents.length - 1; i>=0 ; i--){
-            result += String.format("%09d",this.contents[i]);
+        result += this.contents[this.contents.length - 1];
+        for (int i = this.contents.length - 2; i >= 0; i--){
+            result += String.format("%09d", this.contents[i]);
         }
         return result;
 
