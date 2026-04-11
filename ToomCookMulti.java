@@ -10,13 +10,28 @@ public class ToomCookMulti {
     private static final int THRESHOLD = 2;
 
     public static String multiply(String aStr, String bStr){
+
         MassiveInteger a = new MassiveInteger(aStr);
         MassiveInteger b = new MassiveInteger(bStr);
-        return toom3(a, b).toString();
+
+        boolean resultSign = (a.isPositive()==b.isPositive());
+        if (!a.isPositive()){
+            a.flipSign();
+        }
+        if (!b.isPositive()){
+            b.flipSign();
+        }
+
+        MassiveInteger result = MassiveInteger.createShallowCopy(toom3(a, b));
+        if (resultSign!=result.isPositive()){
+            result.flipSign();
+        }
+        return result.toString();
     }
     /*
-    what we need: main recursive alg, and helper methods 
-    where appropriate to encapsulate concepts and/or reuse code */
+    this is the main recursive alg, with a base case calling regulat multiplication
+    if either number is less than about 10^18 (about 10^(9*threshold))
+    */
     private static MassiveInteger toom3(MassiveInteger a, MassiveInteger b){
         if (a.length() <= THRESHOLD || b.length() <= THRESHOLD){
             return a.schoolbookMultiply(b);

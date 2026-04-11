@@ -19,6 +19,7 @@ public class MassiveInteger{
         */
         int digitLen = inputStr.length();
 
+        //if string starts with -, makes MassiveInt negative and fixes sizing
         if (inputStr.startsWith("-")){
             this.positive = false;
             inputStr = inputStr.substring(1,digitLen);
@@ -28,19 +29,22 @@ public class MassiveInteger{
             this.positive = true;
         }
 
-        
+        //each element of int array stores up to 10^9
+        //max base of 10 that fits in int
         int contentsLen = (digitLen +8 ) / 9;
         this.contents = new int[contentsLen];
 
         int contentsIdx = 0;
         int stringIdx = digitLen-1; 
 
+        //parse string backwards, cuz little endian
         while(stringIdx>=8){
             contents[contentsIdx] = Integer.parseInt(inputStr.substring(stringIdx-8,stringIdx+1));
             contentsIdx++;
             stringIdx-=9;
         }
 
+        //leftovers
         if (stringIdx>=0){
             contents[contentsIdx]=Integer.parseInt(inputStr.substring(0,stringIdx+1));
         }
@@ -48,7 +52,7 @@ public class MassiveInteger{
     }
 
     public MassiveInteger(int[] contents, boolean positive){
-        //should add something that truncates unneeded empty 0 ints in array
+        //instantiate
         this.contents = contents;
         this.positive = positive;
     }
@@ -56,6 +60,7 @@ public class MassiveInteger{
     public static MassiveInteger createShallowCopy(MassiveInteger massiveInteger){
         /*
         helpful for dealing with negative signs
+        this may have been completely unneeded
          */
         return new MassiveInteger(massiveInteger.contents,massiveInteger.positive);
     }
@@ -79,16 +84,18 @@ public class MassiveInteger{
         also returns sign to positive if MassiveInt is just 0
          */
         int i = this.contents.length-1;
+       
 
         if (i==0 && this.contents[0]==0){
             this.positive=true;
+            return;
         }
 
         if (this.contents[i]!=0){
             return;
         }
 
-        while (this.contents[i]==0){
+        while (this.contents[i]==0 && i>0){
             i--;
         }
 
@@ -120,34 +127,36 @@ public class MassiveInteger{
     }
 
     return 0;
-
-
     }
      
     public MassiveInteger add(MassiveInteger b){
         /*        
-         */
+        add two massiveIntegers
+        
+        */
 
-
-        if (this.isPositive() && !b.isPositive()){
+        //if one but not both signs are negative, separate logic is needed;
+        //call upon subtract method
+        if (this.isPositive() != b.isPositive()){
             MassiveInteger bMag = createShallowCopy(b);
             bMag.flipSign();
             return this.subtract(bMag);
         }
-        if (!this.isPositive() && b.isPositive()){
-            MassiveInteger thisMag = createShallowCopy(this);
-            thisMag.flipSign();
-            return b.subtract(thisMag);
-        }
-
-        boolean resultPos = this.isPositive() ? true : false; //only have to check sign of 1 as different signs already accounted for
         
+        //only have to check sign of 1 operand as different signs already accounted for
+        boolean resultPos = this.isPositive() ? true : false; 
 
+        //max result size is the biggest operand size + 1 for overflow
         int maxResultSize = (Math.max(this.contents.length, b.contents.length) + 1);
         int[] resultContents = new int[maxResultSize];
 
         long carry = 0;
 
+        //core addition algo
+        //as you will see in subsequent methods,
+        //we cast to longs during intermediate operations
+        //to prevent overflow
+        //i cannot make peace with the fact that java doesnt have unsigned ints >:(
         for (int i = 0; i < maxResultSize - 1; i++){
             long thisVal = (i<this.contents.length) ? this.contents[i] : 0;
             long bVal = (i<b.contents.length) ? b.contents[i] : 0;
@@ -167,7 +176,9 @@ public class MassiveInteger{
             resultContents[maxResultSize - 1]=(int)carry;
         }
 
-        
+        //you will also see trim at the ends of other methods
+        //should have just put that logic inside of the constructor
+        //o well
         MassiveInteger resInt = new MassiveInteger(resultContents,resultPos);
         resInt.trim();
         return resInt;
@@ -183,17 +194,15 @@ public class MassiveInteger{
         records signs
          */
 
-        if (this.isPositive() && !b.isPositive()){
+        //similar to in addition, checks if it makes more sense to reformulate as the other one
+        if (this.isPositive() != b.isPositive()){
             MassiveInteger bMag = createShallowCopy(b);
             bMag.flipSign();
             return this.add(bMag);
         }
-        if (!this.isPositive() && b.isPositive()){
-            MassiveInteger thisMag = createShallowCopy(this);
-            thisMag.flipSign();
-            return b.add(thisMag);
-        }
-
+        
+        //we want to subtract the 'bigger' one from the 'smaller' one
+        //we keep track of the affect of any invertion of ordering on the sign
         int magnitudeFlag = this.getMagnitude(b);
 
         if (magnitudeFlag==0){
@@ -206,6 +215,7 @@ public class MassiveInteger{
         int[] resultContents = new int[greaterMagInt.contents.length];
         long borrow = 0;
 
+        //core subtraction algorithm
         for(int i = 0; i<greaterMagInt.contents.length;i++){
             long gMagIntVal = greaterMagInt.contents[i];
             long lMagIntVal = (i<lesserMagInt.contents.length) ? lesserMagInt.contents[i] : 0;
@@ -215,7 +225,6 @@ public class MassiveInteger{
             if (dif<0){
                 dif+=BASE;
                 borrow = 1;
-
             }
             else{
                 borrow=0;
@@ -235,6 +244,10 @@ public class MassiveInteger{
 
 
     public MassiveInteger getLimbs(int from, int to){
+        /*
+        method to 'split up' MassiveInt,
+        as is needed by toom algorithm
+        */
         int actualTo = Math.min(to, this.contents.length);
         int len = Math.max(0, actualTo - from);
         int[] result = new int[Math.max(1, len)];
@@ -259,7 +272,8 @@ public class MassiveInteger{
         int bLen = b.contents.length;
 
         int[] resultContents = new int[thisLen+bLen];
-
+        
+        //core multiplication algorithm
         for (int i = 0; i<thisLen; i++){
             long carry = 0;
             for (int j = 0; j < bLen; j++){
@@ -271,6 +285,9 @@ public class MassiveInteger{
                 carry = res / BASE;
 
             }
+            //if there is leftover carry after each time that
+            // all of massiveInt b is multipled by an element of contents of this massiveInt,
+            // this method part adds it on
             if (carry!=0){
                 int carryIdx = i+bLen;
                 while (carry>0 && carryIdx < resultContents.length){
@@ -292,17 +309,19 @@ public class MassiveInteger{
 
     
     public MassiveInteger scalarMultiply(int scalar){
+        
         boolean positiveRes = (this.positive==(scalar>=0));
         int thisLen = this.contents.length;
-        int[] resultContents = new int[thisLen+1]; //dont think we're using scalars big enough for this to ever be an issue
+        int[] resultContents = new int[thisLen+1]; 
         long carry = 0;
 
+        //go thru and multiply each element of contents
         for (int i = 0; i<thisLen; i++){
             long res = (long)this.contents[i] * scalar + carry;
             resultContents[i]=(int)(res%BASE);
             carry = res/BASE;
         }
-        if (carry!=0){
+        if (carry!=0){ //if there is carry over at the end
             resultContents[thisLen] = (int)carry;
         }
         MassiveInteger result = new MassiveInteger(resultContents,positiveRes);
@@ -315,7 +334,7 @@ public class MassiveInteger{
         if (scalar==0){
             System.err.println("NO DIVISION BY 0 PLZ");
         }
-        if (this.length()==1 && this.contents[0]==0){
+        if (this.length()==1 && this.contents[0]==0){ //if massiveInt is just 0
             return this;
         }
 
@@ -325,12 +344,16 @@ public class MassiveInteger{
         int[] resultContents = new int[thisLen];
         long remainder = 0;
 
+        //core division algo (suprisingly simple given the other methods!)
         for (int i = thisLen-1; i>=0;i--){
             long toDivide = (remainder*BASE)+this.contents[i];
             resultContents[i]=(int)(toDivide/scalar);
             remainder = toDivide%scalar;
         }
         //due to the nature of Toom-Cook, there will never be a decimal remainder
+        if (remainder!=0){
+            System.err.println("Error: no functionality for decimal result of MassiveInteger Division");
+        }
 
         MassiveInteger result = new MassiveInteger(resultContents,positiveRes);
         result.trim();
@@ -348,6 +371,8 @@ public class MassiveInteger{
             return this;
         }
         int[] shiftedContents = new int[this.contents.length + shiftFactor];
+        //since shift is always by elements of contents,
+        //very easy to use built in arraycopy 
         System.arraycopy(
             this.contents,
             0,
@@ -355,7 +380,6 @@ public class MassiveInteger{
             shiftFactor, 
             this.contents.length);
         return new MassiveInteger(shiftedContents, this.isPositive());
-
     }
     
     public String toString(){
@@ -368,17 +392,6 @@ public class MassiveInteger{
             result += String.format("%09d", this.contents[i]);
         }
         return result;
-
     }
-
-
-
-
-
-
-
-
-
-
 
 }
