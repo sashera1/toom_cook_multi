@@ -7,9 +7,20 @@ public class ToomCookMulti {
     and is appropriate for the scope of the project
     */
 
-    private static final int THRESHOLD = 2;
+    private static int DEFAULT_THRESHOLD = 2;
 
-    public static String multiply(String aStr, String bStr){
+    private int THRESHOLD;
+
+
+    public ToomCookMulti(){
+        this.THRESHOLD = DEFAULT_THRESHOLD;
+    }
+
+    public ToomCookMulti(int customThreshold){
+        this.THRESHOLD = customThreshold;
+    }
+
+    public String multiply(String aStr, String bStr){
 
         MassiveInteger a = new MassiveInteger(aStr);
         MassiveInteger b = new MassiveInteger(bStr);
@@ -32,7 +43,7 @@ public class ToomCookMulti {
     this is the main recursive alg, with a base case calling regulat multiplication
     if either number is less than about 10^18 (about 10^(9*threshold))
     */
-    private static MassiveInteger toom3(MassiveInteger aIn, MassiveInteger bIn){
+    private MassiveInteger toom3(MassiveInteger aIn, MassiveInteger bIn){
         if (aIn.length() <= THRESHOLD || bIn.length() <= THRESHOLD){
             return aIn.schoolbookMultiply(bIn);
         }
