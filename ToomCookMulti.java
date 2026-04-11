@@ -32,10 +32,26 @@ public class ToomCookMulti {
     this is the main recursive alg, with a base case calling regulat multiplication
     if either number is less than about 10^18 (about 10^(9*threshold))
     */
-    private static MassiveInteger toom3(MassiveInteger a, MassiveInteger b){
-        if (a.length() <= THRESHOLD || b.length() <= THRESHOLD){
-            return a.schoolbookMultiply(b);
+    private static MassiveInteger toom3(MassiveInteger aIn, MassiveInteger bIn){
+        if (aIn.length() <= THRESHOLD || bIn.length() <= THRESHOLD){
+            return aIn.schoolbookMultiply(bIn);
         }
+
+        boolean resultSign = (aIn.isPositive()==bIn.isPositive());
+        MassiveInteger a, b;
+        if (!aIn.isPositive()){
+            a=MassiveInteger.createShallowCopy(aIn);
+            a.flipSign();
+        }
+        else a=aIn;
+        if (!bIn.isPositive()){
+            b=MassiveInteger.createShallowCopy(bIn);
+            b.flipSign();
+        }
+        else b=bIn;
+
+
+
         int k = (Math.max(a.length(), b.length()) + 2) / 3;
         MassiveInteger aLow  = a.getLimbs(0, k);
         MassiveInteger aMid  = a.getLimbs(k, 2*k);
@@ -75,11 +91,17 @@ public class ToomCookMulti {
         w1 = w1.subtract(w3);
 
         // Recomposition
-        return w0
+        MassiveInteger res = w0
             .add(w1.leftShift(k))
             .add(w2.leftShift(2*k))
             .add(w3.leftShift(3*k))
             .add(w4.leftShift(4*k));
+
+        if (res.isPositive()!=resultSign){
+            res.flipSign();
+        }
+
+        return res;
     }
 
 }

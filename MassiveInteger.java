@@ -249,6 +249,7 @@ public class MassiveInteger{
         as is needed by toom algorithm
         */
         int actualTo = Math.min(to, this.contents.length);
+        
         int len = Math.max(0, actualTo - from);
         int[] result = new int[Math.max(1, len)];
         for (int i = 0; i < len; i++){
@@ -352,6 +353,7 @@ public class MassiveInteger{
         }
         //due to the nature of Toom-Cook, there will never be a decimal remainder
         if (remainder!=0){
+            System.out.println(remainder);
             System.err.println("Error: no functionality for decimal result of MassiveInteger Division");
         }
 
